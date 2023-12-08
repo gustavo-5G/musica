@@ -1,6 +1,6 @@
 som = ""
-scoreLeftWristX = 0
-scoreLeftWristY = 0
+scoreLeftWrist = 0
+scoreRightWrist = 0
 leftWristX = 0
 leftWristY = 0
 rightWristX = 0
@@ -17,26 +17,42 @@ function setup() {
     video = createCapture(VIDEO)
     video.hide()
     poseNet = ml5.poseNet(video, modelLoaded)
-
+    poseNet.on("pose",gotResults)
 }
 function draw() {
     image(video, 0, 0, 600, 500)
     fill("#FF0000")
     stroke("FF0000")
-    circle(leftWristX, leftWristY, 20)
-    isNumber = Number(leftWristX)
-    remove = floor(isNumber)
-    volume = remove / 500
-    document.getElementById("volume").innerHTML = "volume e igual " + volume
-    som.setVolume(volume)
-
-    if (scoreLeftWristX > 0.2) {
-        circle(leftWristX, leftWristY, 20)
-        isNumber = Number(leftWristX)
-        remove = floor(isNumber)
-        volume = remove / 500
-        document.getElementById("volume").innerHTML = "volume e igual " + volume
-        som.setVolume(volume)
+    if (scoreRightWrist > 0.2) {
+        circle(rightWristX, rightWristY, 20)
+        if (rightWristY > 0 && rightWristY <= 100) {
+            document.getElementById("speed").innerHTML = "Velocidade é igual a 0.5 X"
+            som.rate(0.5)
+        }
+        else if(rightWristY > 100 && rightWristY <= 200){
+            document.getElementById("speed").innerHTML = "Velocidade é igual a 1 X"
+            som.rate(1)
+        }
+        else if(rightWristY > 200 && rightWristY <= 300){
+            document.getElementById("speed").innerHTML = "Velocidade é igual a 1.5 X"
+            som.rate(1.5)
+        }
+        else if(rightWristY > 300 && rightWristY <= 400){
+            document.getElementById("speed").innerHTML = "Velocidade é igual a 2 X"
+            som.rate(2)
+        }
+        else if(rightWristY > 400){
+            document.getElementById("speed").innerHTML = "Velocidade é igual a 2.5 X"
+            som.rate(2.5)
+        }
+        if (scoreLeftWrist > 0.2) {
+            circle(rightWristX, rightWristY, 20)
+            isNumber = Number(leftWristY)
+            remove = floor(isNumber)
+            volume = remove / 500
+            document.getElementById("volume").innerHTML = "volume e igual " + volume
+            som.setVolume(volume)
+        }
     }
 }
 function play() {
@@ -52,8 +68,9 @@ function modelLoaded() {
 function gotResults(results) {
     if (results.lenght > 0) {
         console.log(results)
-        scoreLeftWristX = results[0].pose.keypoints[9].score
-        console.log(scoreLeftWristX)
+        scoreLeftWrist = results[0].pose.keypoints[9].score
+        scoreRightWrist = results[0].pose.keypoints[10].score
+        console.log(scoreLeftWrist)
 
         leftWristX = results[0].pose.leftWrist.x
         leftWristY = results[0].pose.leftWrist.y
